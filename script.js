@@ -1,6 +1,5 @@
-// WeatherAPI.com API 키 (실제 사용 시 환경변수로 관리하세요)
-const API_KEY = 'your_api_key_here'; // 여기에 실제 API 키를 입력하세요
-const API_BASE_URL = 'https://api.weatherapi.com/v1';
+// 서버 API 엔드포인트 (환경변수에서 API 키를 관리)
+const API_BASE_URL = '/api/weather';
 
 // DOM 요소들
 const elements = {
@@ -97,7 +96,7 @@ async function getWeatherByCity(city) {
     showLoading();
     
     try {
-        const response = await fetch(`${API_BASE_URL}/current.json?key=${API_KEY}&q=${city}&lang=ko`);
+        const response = await fetch(`${API_BASE_URL}?q=${encodeURIComponent(city)}`);
         
         if (!response.ok) {
             throw new Error('도시를 찾을 수 없습니다.');
@@ -114,7 +113,7 @@ async function getWeatherByCity(city) {
 // 좌표로 날씨 정보 가져오기
 async function getWeatherByCoords(lat, lon) {
     try {
-        const response = await fetch(`${API_BASE_URL}/current.json?key=${API_KEY}&q=${lat},${lon}&lang=ko`);
+        const response = await fetch(`${API_BASE_URL}?q=${lat},${lon}`);
         
         if (!response.ok) {
             throw new Error('날씨 정보를 가져올 수 없습니다.');
@@ -202,17 +201,3 @@ function showError(message) {
     elements.errorMessage.style.display = 'block';
     document.getElementById('errorText').textContent = message;
 }
-
-// API 키 확인 및 설정 안내
-function checkApiKey() {
-    if (API_KEY === 'your_api_key_here') {
-        showError('WeatherAPI.com API 키를 설정해 주세요. script.js 파일의 API_KEY 변수를 수정하세요.');
-        return false;
-    }
-    return true;
-}
-
-// 페이지 로드 시 API 키 확인
-window.addEventListener('load', () => {
-    checkApiKey();
-});
