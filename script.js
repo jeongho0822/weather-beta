@@ -1,6 +1,18 @@
-// 서버 API 엔드포인트 (환경변수에서 API 키를 관리)
-// 로컬 개발 및 배포 환경 모두 지원
-const API_BASE_URL = `${window.location.origin}/api/weather`;
+// WeatherAPI.com API 키 (localStorage 또는 직접 입력)
+let API_KEY = localStorage.getItem('WEATHER_API_KEY') || 'your_api_key_here';
+const API_BASE_URL = 'https://api.weatherapi.com/v1';
+
+// API 키 설정 함수 (콘솔에서 사용)
+function setApiKey(key) {
+    if (!key || key.length < 10) {
+        console.error('유효한 API 키를 입력해주세요.');
+        return;
+    }
+    API_KEY = key;
+    localStorage.setItem('WEATHER_API_KEY', key);
+    console.log('API 키 저장 완료. 페이지를 새로고침합니다.');
+    location.reload();
+}
 
 // DOM 요소들
 const elements = {
@@ -97,13 +109,14 @@ async function getWeatherByCity(city) {
     showLoading();
     
     try {
-        const response = await fetch(`${API_BASE_URL}?q=${encodeURIComponent(city)}`);
+        const response = await fetch(`${API_BASE_URL}/current.xml?key=${API_KEY}&q=${city}&aqi=no`);
         
         if (!response.ok) {
             throw new Error('도시를 찾을 수 없습니다.');
         }
         
-        const data = await response.json();
+        const xmlText = await response.text();
+        const data = parseWeatherXML(xmlText);
         displayWeatherData(data);
     } catch (error) {
         console.error('날씨 정보 가져오기 실패:', error);
@@ -115,18 +128,72 @@ async function getWeatherByCity(city) {
 async function getWeatherByCoords(lat, lon) {
     showLoading();
     try {
-        const response = await fetch(`${API_BASE_URL}?q=${lat},${lon}`);
+        const response = await fetch(`${API_BASE_URL}/current.xml?key=${API_KEY}&q=${lat},${lon}&aqi=no`);
         
         if (!response.ok) {
             throw new Error('날씨 정보를 가져올 수 없습니다.');
         }
         
-        const data = await response.json();
+        const xmlText = await response.text();
+        const data = parseWeatherXML(xmlText);
         displayWeatherData(data);
     } catch (error) {
         console.error('날씨 정보 가져오기 실패:', error);
         showError(error.message || '날씨 정보를 가져오는 중 오류가 발생했습니다.');
     }
+}
+
+// XML 응답을 JSON 객체로 파싱
+function parseWeatherXML(xmlText) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+    
+    // 파싱 오류 확인
+    if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+        throw new Error('API 응답 파싱 오류');
+    }
+    
+    // 오류 메시지 확인
+    const errors = xmlDoc.getElementsByTagName('error');
+    if (errors.length > 0) {
+        const errorMessage = errors[0].getElementsByTagName('message')[0]?.textContent;
+        throw new Error(errorMessage || '날씨 정보를 가져올 수 없습니다.');
+    }
+    
+    // XML 데이터 추출
+    const locations = xmlDoc.getElementsByTagName('location');
+    const currents = xmlDoc.getElementsByTagName('current');
+    
+    if (locations.length === 0 || currents.length === 0) {
+        throw new Error('날씨 데이터를 찾을 수 없습니다.');
+    }
+    
+    const location = locations[0];
+    const current = currents[0];
+    const conditions = current.getElementsByTagName('condition');
+    
+    const getElementValue = (elements, index = 0) => {
+        const el = elements[index];
+        return el ? el.textContent : '';
+    };
+    
+    return {
+        location: {
+            name: getElementValue(location.getElementsByTagName('name')),
+            country: getElementValue(location.getElementsByTagName('country')),
+        },
+        current: {
+            temp_c: parseFloat(getElementValue(current.getElementsByTagName('temp_c'))) || 0,
+            feelslike_c: parseFloat(getElementValue(current.getElementsByTagName('feelslike_c'))) || 0,
+            condition: {
+                text: conditions.length > 0 ? getElementValue(conditions[0].getElementsByTagName('text')) : 'N/A',
+            },
+            humidity: parseInt(getElementValue(current.getElementsByTagName('humidity'))) || 0,
+            vis_km: parseFloat(getElementValue(current.getElementsByTagName('vis_km'))) || 0,
+            wind_kph: parseFloat(getElementValue(current.getElementsByTagName('wind_kph'))) || 0,
+            pressure_mb: parseFloat(getElementValue(current.getElementsByTagName('pressure_mb'))) || 0,
+        }
+    };
 }
 
 // 날씨 데이터 화면에 표시
@@ -163,16 +230,6 @@ function displayWeatherData(data) {
     showWeatherInfo();
 }
 
-// 시간 포맷팅 (UNIX 타임스탬프를 HH:MM 형식으로)
-function formatTime(timestamp) {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-}
-
 // Date 객체를 HH:MM 형식으로 포맷팅
 function formatTimeFromDate(date) {
     return date.toLocaleTimeString('ko-KR', {
@@ -203,3 +260,25 @@ function showError(message) {
     elements.errorMessage.style.display = 'block';
     document.getElementById('errorText').textContent = message;
 }
+
+// API 키 설정 함수
+function setApiKey(key) {
+    API_KEY = key;
+    localStorage.setItem('WEATHER_API_KEY', key);
+    location.reload();
+}
+
+// API 키 확인 및 설정 안내
+function checkApiKey() {
+    if (API_KEY === 'your_api_key_here') {
+        const message = 'API 키 설정 필요\n1. https://www.weatherapi.com 에서 무료 API 키 발급\n2. 콘솔에서: setApiKey("your_key")';
+        showError(message);
+        return false;
+    }
+    return true;
+}
+
+// 페이지 로드 시 API 키 확인
+window.addEventListener('load', () => {
+    checkApiKey();
+});
