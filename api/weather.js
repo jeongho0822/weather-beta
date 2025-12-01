@@ -30,13 +30,15 @@ export default async function handler(req, res) {
         );
 
         if (!response.ok) {
-            throw new Error('날씨 정보를 가져올 수 없습니다.');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error?.message || '날씨 정보를 가져올 수 없습니다.');
         }
 
         const data = await response.json();
         res.status(200).json(data);
     } catch (error) {
         console.error('API 오류:', error);
-        res.status(500).json({ error: error.message });
+        const statusCode = error.message.includes('API') ? 401 : 500;
+        res.status(statusCode).json({ error: error.message || '서버 오류가 발생했습니다.' });
     }
 }

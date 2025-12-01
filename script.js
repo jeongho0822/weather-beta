@@ -112,6 +112,7 @@ async function getWeatherByCity(city) {
 
 // 좌표로 날씨 정보 가져오기
 async function getWeatherByCoords(lat, lon) {
+    showLoading();
     try {
         const response = await fetch(`${API_BASE_URL}?q=${lat},${lon}`);
         
