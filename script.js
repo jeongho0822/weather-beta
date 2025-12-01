@@ -1,5 +1,6 @@
 // 서버 API 엔드포인트 (환경변수에서 API 키를 관리)
-const API_BASE_URL = '/api/weather';
+// 로컬 개발 및 배포 환경 모두 지원
+const API_BASE_URL = `${window.location.origin}/api/weather`;
 
 // DOM 요소들
 const elements = {
