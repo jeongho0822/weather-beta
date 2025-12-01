@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Now - 실시간 날씨 정보</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <i class="fas fa-cloud-sun"></i>
+                    Weather Now
+                </h1>
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="cityInput" placeholder="도시명을 입력하세요..." />
+                        <button id="searchBtn" class="search-btn">검색</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="weather-card" id="weatherCard">
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>날씨 정보를 불러오는 중...</p>
+                </div>
+
+                <div class="weather-info" id="weatherInfo" style="display: none;">
+                    <div class="current-weather">
+                        <div class="location">
+                            <h2 id="cityName">서울</h2>
+                            <p id="country">KR</p>
+                        </div>
+                        <div class="temperature">
+                            <span id="temp">--°</span>
+                            <div class="weather-icon">
+                                <i id="weatherIcon" class="fas fa-sun"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="weather-description">
+                        <p id="description">맑음</p>
+                        <p id="feelsLike">체감 온도 --°</p>
+                    </div>
+
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <i class="fas fa-eye"></i>
+                            <div class="detail-info">
+                                <span class="label">가시거리</span>
+                                <span id="visibility" class="value">-- km</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-tint"></i>
+                            <div class="detail-info">
+                                <span class="label">습도</span>
+                                <span id="humidity" class="value">--%</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-wind"></i>
+                            <div class="detail-info">
+                                <span class="label">풍속</span>
+                                <span id="windSpeed" class="value">-- m/s</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-thermometer-half"></i>
+                            <div class="detail-info">
+                                <span class="label">기압</span>
+                                <span id="pressure" class="value">-- hPa</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-sunrise"></i>
+                            <div class="detail-info">
+                                <span class="label">일출</span>
+                                <span id="sunrise" class="value">--:--</span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-sunset"></i>
+                            <div class="detail-info">
+                                <span class="label">일몰</span>
+                                <span id="sunset" class="value">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="error-message" id="errorMessage" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>날씨 정보를 불러올 수 없습니다</h3>
+                    <p id="errorText">다시 시도해 주세요.</p>
+                </div>
+            </div>
+
+            <div class="current-location-btn">
+                <button id="currentLocationBtn">
+                    <i class="fas fa-location-arrow"></i>
+                    현재 위치 날씨
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Weather Now. WeatherAPI.com 사용</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
