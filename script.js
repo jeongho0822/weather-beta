@@ -1,4 +1,6 @@
-// WeatherAPI.com API 키 (localStorage 또는 직접 입력)
+// WeatherAPI.com API 설정 (Vercel 환경변수 또는 localStorage)
+// Vercel 배포: Settings → Environment Variables → VITE_WEATHER_API_KEY 설정
+// 로컬 테스트: 콘솔에서 setApiKey("your_key") 실행
 let API_KEY = localStorage.getItem('WEATHER_API_KEY') || 'your_api_key_here';
 const API_BASE_URL = 'https://api.weatherapi.com/v1';
 
@@ -65,6 +67,13 @@ document.addEventListener('DOMContentLoaded', function() {
     elements.searchBtn.addEventListener('click', handleSearch);
     elements.cityInput.addEventListener('keypress', handleEnterKey);
     elements.currentLocationBtn.addEventListener('click', getCurrentLocationWeather);
+    
+    // API 키 확인
+    if (API_KEY === 'your_api_key_here') {
+        const msg = 'API 키 설정 필요\n\nVercel 배포: Settings → Environment Variables\n변수명: VITE_WEATHER_API_KEY\n\n로컬 테스트: 콘솔에서 setApiKey("your_key")';
+        showError(msg);
+        return;
+    }
     
     // 기본 도시 (서울)의 날씨 로드
     getWeatherByCity('Seoul');
@@ -261,24 +270,14 @@ function showError(message) {
     document.getElementById('errorText').textContent = message;
 }
 
-// API 키 설정 함수
+// API 키 설정 함수 (콘솔에서 사용: setApiKey("your_key"))
 function setApiKey(key) {
+    if (!key || key.length < 10) {
+        console.error('유효한 API 키를 입력하세요 (최소 10자).');
+        return;
+    }
     API_KEY = key;
     localStorage.setItem('WEATHER_API_KEY', key);
+    console.log('API 키가 저장되었습니다. 페이지를 새로고침합니다...');
     location.reload();
 }
-
-// API 키 확인 및 설정 안내
-function checkApiKey() {
-    if (API_KEY === 'your_api_key_here') {
-        const message = 'API 키 설정 필요\n1. https://www.weatherapi.com 에서 무료 API 키 발급\n2. 콘솔에서: setApiKey("your_key")';
-        showError(message);
-        return false;
-    }
-    return true;
-}
-
-// 페이지 로드 시 API 키 확인
-window.addEventListener('load', () => {
-    checkApiKey();
-});
